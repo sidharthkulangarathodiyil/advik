@@ -2,10 +2,11 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Advik Metals and Minerals | Global Mineral Supply</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
@@ -23,12 +24,14 @@
     .text-gradient {
       background: linear-gradient(to bottom right, #ffffff, #a1a1aa);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .copper-gradient {
       background: linear-gradient(to right, #d4af37, #b87333);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -51,21 +54,39 @@
     }
 
     /* Animations */
-    @keyframes fadeIn {
+    @keyframes blurFadeIn {
       from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px) scale(0.95);
+        filter: blur(20px);
       }
 
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
+        filter: blur(0);
       }
     }
 
     .animate-fade-up {
-      animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       opacity: 0;
+      will-change: opacity, transform, filter;
+    }
+
+    .animate-fade-up.is-revealed {
+      animation: blurFadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes heroBlur {
+      0% {
+        filter: blur(8px) brightness(0.7);
+        transform: scale(1.05);
+      }
+
+      100% {
+        filter: blur(0px) brightness(1);
+        transform: scale(1.15);
+      }
     }
 
     .delay-100 {
@@ -79,15 +100,149 @@
     .delay-300 {
       animation-delay: 0.3s;
     }
+
+    /* Image Trail CSS */
+    .trail-content {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 100;
+      border-radius: 8px;
+      background: transparent;
+      overflow: visible;
+    }
+
+    .trail-content__img {
+      width: 190px;
+      aspect-ratio: 1.1;
+      border-radius: 15px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      overflow: hidden;
+      will-change: transform, filter;
+      pointer-events: none;
+    }
+
+    .trail-content__img-inner {
+      background-position: 50% 50%;
+      width: calc(100% + 20px);
+      height: calc(100% + 20px);
+      background-size: cover;
+      position: absolute;
+      top: calc(-1 * 20px / 2);
+      left: calc(-1 * 20px / 2);
+      pointer-events: none;
+    }
+
+    /* StarBorder CSS */
+    .star-border-container {
+      display: inline-flex;
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      padding: 2px;
+      /* matches thickness=2 on all sides */
+    }
+
+    .border-gradient-bottom {
+      position: absolute;
+      width: 300%;
+      height: 50%;
+      opacity: 0.7;
+      bottom: -12px;
+      right: -250%;
+      border-radius: 50%;
+      animation: star-movement-bottom linear infinite alternate;
+      z-index: 0;
+    }
+
+    .border-gradient-top {
+      position: absolute;
+      opacity: 0.7;
+      width: 300%;
+      height: 50%;
+      top: -12px;
+      left: -250%;
+      border-radius: 50%;
+      animation: star-movement-top linear infinite alternate;
+      z-index: 0;
+    }
+
+    .inner-content {
+      position: relative;
+      background: rgba(0, 0, 0, 0.9);
+      border-radius: 19px;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Commodity card specific overlap */
+    article.star-border-container {
+      display: flex;
+      /* cards are block/flex, not inline */
+      border: none;
+      padding: 1px;
+    }
+
+    article .inner-content {
+      background: transparent;
+      /* Card interior should remain glass */
+    }
+
+    @keyframes star-movement-bottom {
+      0% {
+        transform: translate(0%, 0%);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(-100%, 0%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes star-movement-top {
+      0% {
+        transform: translate(0%, 0%);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(100%, 0%);
+        opacity: 0;
+      }
+    }
+
+    .border-glow-wrapper {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 2px;
+      pointer-events: none;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .star-border-container:hover .border-glow-wrapper {
+      opacity: 1;
+    }
   </style>
 </head>
 
-<body class="bg-black text-zinc-400 antialiased selection:bg-orange-900 selection:text-white">
+<body class="overflow-x-hidden bg-black text-zinc-400 antialiased selection:bg-orange-900 selection:text-white">
   <!-- Navigation -->
   <nav class="fixed top-0 w-full z-50 border-b border-white/5 bg-black/80 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-      <a href="#" class="text-white font-medium tracking-tight text-lg uppercase flex items-center gap-2">
-        Advik Metals and Minerals
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2">
+        <img src="advik-logo-header.png" alt="Advik Metals and Minerals Logo"
+          class="h-24 lg:h-32 max-w-[75vw] md:max-w-none w-auto object-contain">
       </a>
       <div class="hidden md:flex items-center gap-8 text-sm font-medium">
         <a href="#about" class="hover:text-white transition-colors">
@@ -99,22 +254,51 @@
         <a href="#contact" class="hover:text-white transition-colors">
           Contact
         </a>
-        <a href="#contact"
-          class="px-4 py-2 border border-white/10 rounded text-white hover:bg-white/5 transition-colors">
-          Get Quote
+        <a href="#contact" class="star-border-container">
+          <div class="border-glow-wrapper">
+            <div class="border-gradient-bottom"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+            <div class="border-gradient-top"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+          </div>
+          <div class="inner-content px-4 py-2 border border-white/10 text-white hover:bg-white/5 transition-colors"
+            style="border-radius: 19px; background: rgba(0,0,0,0.8);">
+            Get Quote
+          </div>
         </a>
       </div>
-      <button class="md:hidden text-white">
+      <button id="mobile-menu-btn" class="md:hidden text-white relative z-50">
         <iconify-icon icon="solar:hamburger-menu-linear" width="24"></iconify-icon>
       </button>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu"
+      class="fixed inset-0 bg-black/95 backdrop-blur-xl z-40 hidden flex-col items-center justify-center gap-8 text-xl font-medium transition-all duration-300 opacity-0 translate-y-[-20px]">
+      <a href="#about" class="text-white hover:text-orange-400 transition-colors mobile-link">Our Impact</a>
+      <a href="#products" class="text-white hover:text-orange-400 transition-colors mobile-link">Products</a>
+      <a href="#contact" class="text-white hover:text-orange-400 transition-colors mobile-link">Contact</a>
+      <a href="#contact" class="star-border-container mobile-link mt-4">
+        <div class="border-glow-wrapper">
+          <div class="border-gradient-bottom"
+            style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+          <div class="border-gradient-top"
+            style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+        </div>
+        <div class="inner-content px-6 py-3 border border-white/10 text-white hover:bg-white/5 transition-colors"
+          style="border-radius: 19px; background: rgba(0,0,0,0.8);">
+          Get Quote
+        </div>
+      </a>
     </div>
   </nav>
 
   <!-- Hero Section -->
   <section class="relative min-h-screen flex items-center pt-20 overflow-hidden">
     <!-- Background Image with Overlay -->
-    <div class="absolute inset-0 z-0">
-      <img src="copper ore.WEBP" alt="Mineral Texture" class="w-full h-full object-cover opacity-30 scale-105">
+    <div class="absolute inset-0 z-0 overflow-hidden">
+      <img src="copper ore.WEBP" alt="Mineral Texture"
+        class="w-full h-full object-cover opacity-30 animate-[heroBlur_10s_ease-in-out_infinite_alternate] origin-center">
       <div class="absolute inset-0 bg-gradient-to-b from-black via-black/80 to-black"></div>
     </div>
 
@@ -139,13 +323,31 @@
           integrated from extraction to export.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 animate-fade-up delay-300">
-          <a href="#products"
-            class="px-6 py-3 bg-white text-black font-medium rounded hover:bg-zinc-200 transition-colors text-center">
-            View Commodities
+          <a href="#products" class="star-border-container group">
+            <div class="border-glow-wrapper">
+              <div class="border-gradient-bottom"
+                style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+              <div class="border-gradient-top"
+                style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+            </div>
+            <div
+              class="inner-content px-6 py-3 font-medium text-center text-white group-hover:bg-white/10 transition-colors"
+              style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);">
+              View Commodities
+            </div>
           </a>
-          <a href="#contact"
-            class="px-6 py-3 border border-white/20 text-white font-medium rounded hover:bg-white/5 transition-colors text-center">
-            Contact Sales
+          <a href="#contact" class="star-border-container group">
+            <div class="border-glow-wrapper">
+              <div class="border-gradient-bottom"
+                style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+              <div class="border-gradient-top"
+                style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+            </div>
+            <div
+              class="inner-content px-6 py-3 font-medium text-center text-white group-hover:bg-white/5 transition-colors"
+              style="background: rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.2);">
+              Contact Sales
+            </div>
           </a>
         </div>
       </div>
@@ -153,11 +355,16 @@
       <!-- Abstract Visualization -->
       <div class="hidden lg:grid grid-cols-2 gap-4 animate-fade-up delay-300 opacity-80">
         <div
-          class="glass-card p-6 rounded-xl aspect-square flex flex-col justify-between hover:border-orange-500/30 transition-colors">
-          <iconify-icon icon="solar:cube-linear" class="text-orange-400" width="32" stroke-width="1.5"></iconify-icon>
-          <div>
+          class="relative p-6 rounded-xl aspect-square flex flex-col justify-between hover:border-orange-500/30 transition-colors overflow-hidden group">
+          <video src="copper.mp4" autoplay loop muted playsinline
+            class="absolute inset-0 w-full h-full object-cover z-0 group-hover:scale-105 group-hover:blur-[2px] transition-all duration-700"></video>
+          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/20 z-0"></div>
+
+          <iconify-icon icon="solar:cube-linear" class="text-orange-400 relative z-10" width="32"
+            stroke-width="1.5"></iconify-icon>
+          <div class="relative z-10">
             <p class="text-white text-lg font-medium">Copper Ore</p>
-            <p class="text-sm text-zinc-500 mt-1">High Grade 25% Cu</p>
+            <p class="text-sm text-zinc-300 mt-1">High Grade 25% Cu</p>
           </div>
         </div>
         <div
@@ -181,7 +388,7 @@
         Our Global Impact
       </h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <div class="group">
+        <div class="group animate-fade-up">
           <div
             class="h-10 w-10 rounded border border-white/10 flex items-center justify-center mb-4 group-hover:border-white/30 transition-colors">
             <iconify-icon icon="solar:box-linear" class="text-white" width="20" stroke-width="1.5"></iconify-icon>
@@ -193,7 +400,7 @@
             Exported per shipment to international clients worldwide.
           </p>
         </div>
-        <div class="group">
+        <div class="group animate-fade-up delay-100">
           <div
             class="h-10 w-10 rounded border border-white/10 flex items-center justify-center mb-4 group-hover:border-white/30 transition-colors">
             <iconify-icon icon="solar:verified-check-linear" class="text-white" width="20"
@@ -206,7 +413,7 @@
             Rigorous quality testing and documentation for every batch.
           </p>
         </div>
-        <div class="group">
+        <div class="group animate-fade-up delay-200">
           <div
             class="h-10 w-10 rounded border border-white/10 flex items-center justify-center mb-4 group-hover:border-white/30 transition-colors">
             <iconify-icon icon="solar:earth-linear" class="text-white" width="20" stroke-width="1.5"></iconify-icon>
@@ -218,7 +425,7 @@
             Seamless port-to-port delivery across Asia, Americas, and EMEA.
           </p>
         </div>
-        <div class="group">
+        <div class="group animate-fade-up delay-300">
           <div
             class="h-10 w-10 rounded border border-white/10 flex items-center justify-center mb-4 group-hover:border-white/30 transition-colors">
             <iconify-icon icon="solar:leaf-linear" class="text-white" width="20" stroke-width="1.5"></iconify-icon>
@@ -237,7 +444,7 @@
   <!-- About Section -->
   <section id="about" class="py-32 relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
-      <div>
+      <div class="animate-fade-up">
         <h2 class="text-3xl md:text-5xl font-medium text-white tracking-tight mb-8">
           Your Trusted Partner in
           <br>
@@ -278,9 +485,10 @@
           </div>
         </div>
       </div>
-      <div class="relative h-[600px] rounded-2xl overflow-hidden border border-white/10 group">
+      <div
+        class="relative h-[600px] rounded-2xl overflow-hidden border border-white/10 group animate-fade-up delay-200">
         <img src="iron ore.WEBP" alt="Open pit mine"
-          class="w-full h-full object-cover grayscale opacity-60 group-hover:scale-105 transition-transform duration-700">
+          class="w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:blur-[4px] transition-all duration-700">
         <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
         <div class="absolute bottom-8 left-8">
           <div class="flex items-center gap-2 text-white font-medium mb-2">
@@ -293,10 +501,57 @@
     </div>
   </section>
 
+  <!-- Interactive Trail Section -->
+  <section class="py-24 bg-black relative overflow-hidden border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-6 mb-12 animate-fade-up text-center">
+      <h2 class="text-3xl md:text-5xl font-medium text-white tracking-tight mb-4">
+        Discover the Elements
+      </h2>
+      <p class="text-zinc-400 max-w-2xl mx-auto">
+        Move your cursor to extract and reveal the raw commodities that build our world.
+      </p>
+    </div>
+
+    <div class="w-full text-center relative" style="height: 500px;">
+      <!-- The ImageTrail targets this container specifically -->
+      <div id="image-trail-container" class="trail-content mx-auto max-w-5xl cursor-crosshair">
+        <!-- Trail Images -->
+        <div class="trail-content__img">
+          <div class="trail-content__img-inner" style="background-image: url('copper ore.WEBP')"></div>
+        </div>
+        <div class="trail-content__img">
+          <div class="trail-content__img-inner" style="background-image: url('coal.WEBP')"></div>
+        </div>
+        <div class="trail-content__img">
+          <div class="trail-content__img-inner" style="background-image: url('iron ore.WEBP')"></div>
+        </div>
+        <div class="trail-content__img">
+          <div class="trail-content__img-inner" style="background-image: url('zinc ore.WEBP')"></div>
+        </div>
+        <div class="trail-content__img">
+          <div class="trail-content__img-inner" style="background-image: url('aluminum.WEBP')"></div>
+        </div>
+        <div class="trail-content__img">
+          <div class="trail-content__img-inner" style="background-image: url('lead ore.WEBP')"></div>
+        </div>
+        <div class="trail-content__img">
+          <div class="trail-content__img-inner"
+            style="background-image: url('https://images.unsplash.com/photo-1614002674996-5fc70d6cb582?auto=format&fit=crop&q=80&w=600')">
+          </div>
+        </div>
+        <div class="trail-content__img">
+          <div class="trail-content__img-inner"
+            style="background-image: url('https://images.unsplash.com/photo-1587588354456-ae376af71a25?auto=format&fit=crop&q=80&w=600')">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Products Section -->
   <section id="products" class="py-24 bg-zinc-950/50">
     <div class="max-w-7xl mx-auto px-6">
-      <div class="mb-16">
+      <div class="mb-16 animate-fade-up">
         <h2 class="text-3xl md:text-4xl font-medium text-white tracking-tight mb-4">
           Our Commodities
         </h2>
@@ -310,92 +565,111 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Copper -->
         <article
-          class="glass-card rounded-xl p-8 hover:bg-white/5 transition-all group lg:col-span-2 relative overflow-hidden flex flex-col justify-between">
-          <img src="copper ore.WEBP" alt="Copper Ore"
-            class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
-          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
-          <div class="relative z-10">
-            <h3 class="text-2xl font-medium text-white mb-4 flex items-center gap-3">
-              <span class="w-2 h-2 rounded-full bg-orange-500"></span>
-              Copper Ore
-            </h3>
-            <p class="text-zinc-300 mb-6 max-w-lg">
-              Advik Metals and Minerals specializes in the export of high-grade copper ore suitable for smelting and
-              refining
-              applications. Each batch is independently verified to ensure
-              consistent metal content and purity.
-            </p>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm mb-6">
-              <div>
-                <span class="block text-zinc-400 mb-1">Copper (Cu)</span>
-                <span class="block text-white font-medium">8% – 25%</span>
+          class="star-border-container glass-card rounded-xl p-0 hover:bg-white/5 transition-all group relative overflow-hidden flex flex-col justify-between animate-fade-up">
+          <div class="border-glow-wrapper">
+            <div class="border-gradient-bottom"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+            <div class="border-gradient-top"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+          </div>
+          <div
+            class="inner-content w-full h-full p-8 flex flex-col justify-between rounded-xl overflow-hidden relative">
+            <img src="copper ore.WEBP" alt="Copper Ore"
+              class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:blur-[4px] transition-all duration-700">
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
+            <div class="relative z-10 flex flex-col h-full">
+              <h3 class="text-2xl font-medium text-white mb-4 flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                Copper Ore
+              </h3>
+              <p class="text-zinc-300 mb-6 max-w-lg">
+                Advik Metals and Minerals specializes in the export of high-grade copper ore suitable for smelting and
+                refining
+                applications. Each batch is independently verified to ensure
+                consistent metal content and purity.
+              </p>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm mb-6">
+                <div>
+                  <span class="block text-zinc-400 mb-1">Copper (Cu)</span>
+                  <span class="block text-white font-medium">8% – 25%</span>
+                </div>
+                <div>
+                  <span class="block text-zinc-400 mb-1">Moisture</span>
+                  <span class="block text-white font-medium">&lt;10%</span>
+                </div>
+                <div>
+                  <span class="block text-zinc-400 mb-1">Form</span>
+                  <span class="block text-white font-medium">Crushed / Bulk Ore</span>
+                </div>
+                <div>
+                  <span class="block text-zinc-400 mb-1">Certified By</span>
+                  <span class="block text-white font-medium">
+                    SGS / Intertek
+                  </span>
+                </div>
               </div>
-              <div>
-                <span class="block text-zinc-400 mb-1">Moisture</span>
-                <span class="block text-white font-medium">&lt;10%</span>
+              <div class="bg-white/10 rounded p-3 text-xs text-zinc-200 backdrop-blur-sm">
+                <span class="text-zinc-400 uppercase tracking-wider font-medium">Applications:</span> Refining,
+                smelting,
+                and manufacturing of electrical wiring, alloys, and industrial components.
               </div>
-              <div>
-                <span class="block text-zinc-400 mb-1">Form</span>
-                <span class="block text-white font-medium">Crushed / Bulk Ore</span>
-              </div>
-              <div>
-                <span class="block text-zinc-400 mb-1">Certified By</span>
-                <span class="block text-white font-medium">
-                  SGS / Intertek
-                </span>
-              </div>
-            </div>
-            <div class="bg-white/10 rounded p-3 text-xs text-zinc-200 backdrop-blur-sm">
-              <span class="text-zinc-400 uppercase tracking-wider font-medium">Applications:</span> Refining, smelting,
-              and manufacturing of electrical wiring, alloys, and industrial components.
             </div>
           </div>
         </article>
 
         <!-- Aluminum -->
         <article
-          class="glass-card rounded-xl p-8 hover:bg-white/5 transition-all group relative overflow-hidden flex flex-col justify-between">
-          <img src="aluminum.WEBP" alt="Aluminum"
-            class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
-          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
-          <div class="relative z-10">
-            <h3 class="text-xl font-medium text-white mb-4 flex items-center gap-3">
-              <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
-              Aluminum
-            </h3>
-            <p class="text-sm text-zinc-300 mb-4">
-              Known for its strength and light weight, our aluminum products serve the automotive, construction, and
-              manufacturing sectors.
-            </p>
-            <p class="text-xs text-zinc-400 uppercase tracking-wider mb-2 font-medium">Available Forms</p>
-            <ul class="space-y-2 text-sm text-zinc-300 mb-4">
-              <li class="flex items-start gap-2">
-                <iconify-icon icon="solar:arrow-right-linear" class="mt-0.5 text-zinc-500"></iconify-icon>
-                Aluminum Ingots
-              </li>
-              <li class="flex items-start gap-2">
-                <iconify-icon icon="solar:arrow-right-linear" class="mt-0.5 text-zinc-500"></iconify-icon>
-                Aluminum Billets
-              </li>
-              <li class="flex items-start gap-2">
-                <iconify-icon icon="solar:arrow-right-linear" class="mt-0.5 text-zinc-500"></iconify-icon>
-                Rolled Aluminum Sheets
-              </li>
-            </ul>
-            <div class="bg-white/10 rounded p-3 text-xs text-zinc-200 backdrop-blur-sm">
-              <span class="text-zinc-400 uppercase tracking-wider font-medium">Quality:</span> International-grade,
-              ideal for extrusion, casting, and fabrication industries.
+          class="star-border-container glass-card rounded-xl p-0 hover:bg-white/5 transition-all group relative overflow-hidden flex flex-col justify-between animate-fade-up delay-100">
+          <div class="border-glow-wrapper">
+            <div class="border-gradient-bottom"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+            <div class="border-gradient-top"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+          </div>
+          <div
+            class="inner-content w-full h-full p-8 flex flex-col justify-between rounded-xl overflow-hidden relative">
+            <img src="aluminum.WEBP" alt="Aluminum"
+              class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:blur-[4px] transition-all duration-700">
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
+            <div class="relative z-10 flex flex-col h-full">
+              <h3 class="text-xl font-medium text-white mb-4 flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-zinc-300"></span>
+                Aluminum
+              </h3>
+              <p class="text-sm text-zinc-300 mb-4">
+                Known for its strength and light weight, our aluminum products serve the automotive, construction, and
+                manufacturing sectors.
+              </p>
+              <p class="text-xs text-zinc-400 uppercase tracking-wider mb-2 font-medium">Available Forms</p>
+              <ul class="space-y-2 text-sm text-zinc-300 mb-4">
+                <li class="flex items-start gap-2">
+                  <iconify-icon icon="solar:arrow-right-linear" class="mt-0.5 text-zinc-500"></iconify-icon>
+                  Aluminum Ingots
+                </li>
+                <li class="flex items-start gap-2">
+                  <iconify-icon icon="solar:arrow-right-linear" class="mt-0.5 text-zinc-500"></iconify-icon>
+                  Aluminum Billets
+                </li>
+                <li class="flex items-start gap-2">
+                  <iconify-icon icon="solar:arrow-right-linear" class="mt-0.5 text-zinc-500"></iconify-icon>
+                  Rolled Aluminum Sheets
+                </li>
+              </ul>
+              <div class="bg-white/10 rounded p-3 text-xs text-zinc-200 backdrop-blur-sm">
+                <span class="text-zinc-400 uppercase tracking-wider font-medium">Quality:</span> International-grade,
+                ideal for extrusion, casting, and fabrication industries.
+              </div>
             </div>
           </div>
         </article>
 
         <!-- Coal -->
         <article
-          class="glass-card rounded-xl p-8 hover:bg-white/5 transition-all group relative overflow-hidden flex flex-col justify-between">
+          class="glass-card rounded-xl p-8 hover:bg-white/5 transition-all group relative overflow-hidden flex flex-col justify-between animate-fade-up delay-200">
           <img src="coal.WEBP" alt="Coal"
-            class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
+            class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:blur-[4px] transition-all duration-700">
           <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
-          <div class="relative z-10">
+          <div class="relative z-10 flex flex-col h-full">
             <h3 class="text-xl font-medium text-white mb-4 flex items-center gap-3">
               <span class="w-2 h-2 rounded-full bg-zinc-700"></span>
               Coal
@@ -405,7 +679,7 @@
               use. Our coal products are sourced from reliable mining partners, ensuring consistent calorific value and
               low impurity levels.
             </p>
-            <div class="space-y-4">
+            <div class="space-y-4 flex flex-col flex-1">
               <div>
                 <p class="text-xs text-zinc-400 uppercase tracking-wider mb-2 font-medium">Types</p>
                 <ul class="space-y-1 text-sm text-zinc-300">
@@ -450,66 +724,85 @@
 
         <!-- Iron Ore -->
         <article
-          class="glass-card rounded-xl p-8 hover:bg-white/5 transition-all group relative overflow-hidden flex flex-col justify-between">
-          <img src="iron ore.WEBP" alt="Iron Ore"
-            class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
-          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
-          <div class="relative z-10">
-            <h3 class="text-xl font-medium text-white mb-4 flex items-center gap-3">
-              <span class="w-2 h-2 rounded-full bg-red-900"></span>
-              Iron Ore
-            </h3>
-            <p class="text-sm text-zinc-300 mb-4">
-              We supply consistent, high-quality iron ore with stable iron composition and minimal impurities, ideal for
-              steelmaking and industrial use.
-            </p>
-            <div class="grid grid-cols-3 gap-4 text-sm border-t border-white/10 pt-4 mb-4">
-              <div>
-                <span class="block text-zinc-400 text-xs">Fe Content</span>
-                <span class="block text-white">55% – 65%</span>
+          class="star-border-container glass-card rounded-xl p-0 hover:bg-white/5 transition-all group relative overflow-hidden flex flex-col justify-between animate-fade-up">
+          <div class="border-glow-wrapper">
+            <div class="border-gradient-bottom"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+            <div class="border-gradient-top"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+          </div>
+          <div
+            class="inner-content w-full h-full p-8 flex flex-col justify-between rounded-xl overflow-hidden relative">
+            <img src="iron ore.WEBP" alt="Iron Ore"
+              class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:blur-[4px] transition-all duration-700">
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
+            <div class="relative z-10 flex flex-col h-full">
+              <h3 class="text-xl font-medium text-white mb-4 flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-red-900"></span>
+                Iron Ore
+              </h3>
+              <p class="text-sm text-zinc-300 mb-4">
+                We supply consistent, high-quality iron ore with stable iron composition and minimal impurities, ideal
+                for
+                steelmaking and industrial use.
+              </p>
+              <div class="grid grid-cols-3 gap-4 text-sm border-t border-white/10 pt-4 mb-4">
+                <div>
+                  <span class="block text-zinc-400 text-xs">Fe Content</span>
+                  <span class="block text-white">55% – 65%</span>
+                </div>
+                <div>
+                  <span class="block text-zinc-400 text-xs">Moisture</span>
+                  <span class="block text-white">&lt;8%</span>
+                </div>
+                <div>
+                  <span class="block text-zinc-400 text-xs">Impurities</span>
+                  <span class="block text-white">Low S &amp; P</span>
+                </div>
               </div>
-              <div>
-                <span class="block text-zinc-400 text-xs">Moisture</span>
-                <span class="block text-white">&lt;8%</span>
+              <div class="bg-white/10 rounded p-3 text-xs text-zinc-200 backdrop-blur-sm">
+                Available in both lump and fine form.
               </div>
-              <div>
-                <span class="block text-zinc-400 text-xs">Impurities</span>
-                <span class="block text-white">Low S &amp; P</span>
-              </div>
-            </div>
-            <div class="bg-white/10 rounded p-3 text-xs text-zinc-200 backdrop-blur-sm">
-              Available in both lump and fine form.
             </div>
           </div>
         </article>
 
         <!-- Zinc Ore -->
         <article
-          class="glass-card rounded-xl p-8 hover:bg-white/5 transition-all group relative overflow-hidden flex flex-col justify-between">
-          <img src="zinc ore.WEBP" alt="Zinc Ore"
-            class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
-          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
-          <div class="relative z-10">
-            <h3 class="text-xl font-medium text-white mb-4 flex items-center gap-3">
-              <span class="w-2 h-2 rounded-full bg-blue-200"></span>
-              Zinc Ore
-            </h3>
-            <p class="text-sm text-zinc-300 mb-4">
-              Advik Metals and Minerals offers zinc ore for galvanization, alloy production, and industrial
-              applications.
-            </p>
-            <div class="grid grid-cols-3 gap-4 text-sm border-t border-white/10 pt-4">
-              <div>
-                <span class="block text-zinc-400 text-xs">Zn Content</span>
-                <span class="block text-white">25% – 45%</span>
-              </div>
-              <div>
-                <span class="block text-zinc-400 text-xs">Form</span>
-                <span class="block text-white">Concentrate / Crushed</span>
-              </div>
-              <div>
-                <span class="block text-zinc-400 text-xs">Use</span>
-                <span class="block text-white">Refining, Zinc Oxide, Die-casting</span>
+          class="star-border-container glass-card rounded-xl p-0 hover:bg-white/5 transition-all group relative overflow-hidden flex flex-col justify-between animate-fade-up delay-100">
+          <div class="border-glow-wrapper">
+            <div class="border-gradient-bottom"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+            <div class="border-gradient-top"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+          </div>
+          <div
+            class="inner-content w-full h-full p-8 flex flex-col justify-between rounded-xl overflow-hidden relative">
+            <img src="zinc ore.WEBP" alt="Zinc Ore"
+              class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:blur-[4px] transition-all duration-700">
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
+            <div class="relative z-10 flex flex-col h-full">
+              <h3 class="text-xl font-medium text-white mb-4 flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-blue-200"></span>
+                Zinc Ore
+              </h3>
+              <p class="text-sm text-zinc-300 mb-4">
+                Advik Metals and Minerals offers zinc ore for galvanization, alloy production, and industrial
+                applications.
+              </p>
+              <div class="grid grid-cols-3 gap-4 text-sm border-t border-white/10 pt-4">
+                <div>
+                  <span class="block text-zinc-400 text-xs">Zn Content</span>
+                  <span class="block text-white">25% – 45%</span>
+                </div>
+                <div>
+                  <span class="block text-zinc-400 text-xs">Form</span>
+                  <span class="block text-white">Concentrate / Crushed</span>
+                </div>
+                <div>
+                  <span class="block text-zinc-400 text-xs">Use</span>
+                  <span class="block text-white">Refining, Zinc Oxide, Die-casting</span>
+                </div>
               </div>
             </div>
           </div>
@@ -517,45 +810,42 @@
 
         <!-- Lead Ore -->
         <article
-          class="glass-card rounded-xl p-8 hover:bg-white/5 transition-all group lg:col-span-3 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-          <img src="lead ore.WEBP" alt="Lead Ore"
-            class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
-          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
-          <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 w-full">
-            <div>
-              <h3 class="text-xl font-medium text-white mb-2 flex items-center gap-3">
-                <span class="w-2 h-2 rounded-full bg-zinc-500"></span>
-                Lead Ore
-              </h3>
-              <p class="text-sm text-zinc-300 max-w-md">
-                Our lead ore is sourced from certified operations and processed to meet
-                smelter-grade requirements.
-              </p>
-            </div>
-            <div class="flex gap-8 text-sm">
-              <div class="text-right">
-                <span class="block text-zinc-400 text-xs uppercase">
-                  Pb Content
-                </span>
-                <span class="block text-white font-medium text-lg">
-                  40% – 70%
-                </span>
+          class="star-border-container glass-card rounded-xl p-0 hover:bg-white/5 transition-all group relative overflow-hidden animate-fade-up delay-200">
+          <div class="border-glow-wrapper">
+            <div class="border-gradient-bottom"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+            <div class="border-gradient-top"
+              style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+          </div>
+          <div
+            class="inner-content w-full h-full p-8 flex flex-col justify-between rounded-xl overflow-hidden relative">
+            <img src="lead ore.WEBP" alt="Lead Ore"
+              class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:blur-[4px] transition-all duration-700">
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30"></div>
+            <div class="relative z-10 flex flex-col h-full">
+              <div>
+                <h3 class="text-xl font-medium text-white mb-4 flex items-center gap-3">
+                  <span class="w-2 h-2 rounded-full bg-zinc-500"></span>
+                  Lead Ore
+                </h3>
+                <p class="text-sm text-zinc-300 mb-4">
+                  Our lead ore is sourced from certified operations and processed to meet
+                  smelter-grade requirements.
+                </p>
               </div>
-              <div class="text-right">
-                <span class="block text-zinc-400 text-xs uppercase">
-                  Form
-                </span>
-                <span class="block text-white font-medium text-lg">
-                  Concentrate / Bulk
-                </span>
-              </div>
-              <div class="text-right">
-                <span class="block text-zinc-400 text-xs uppercase">
-                  Use
-                </span>
-                <span class="block text-white font-medium text-lg">
-                  Batteries, Alloys, Refining
-                </span>
+              <div class="grid grid-cols-3 gap-4 text-sm border-t border-white/10 pt-4">
+                <div>
+                  <span class="block text-zinc-400 text-xs">Pb Content</span>
+                  <span class="block text-white">40% – 70%</span>
+                </div>
+                <div>
+                  <span class="block text-zinc-400 text-xs">Form</span>
+                  <span class="block text-white">Concentrate / Bulk</span>
+                </div>
+                <div>
+                  <span class="block text-zinc-400 text-xs">Use</span>
+                  <span class="block text-white">Batteries, Alloys</span>
+                </div>
               </div>
             </div>
           </div>
@@ -569,7 +859,7 @@
     <div class="max-w-7xl mx-auto px-6">
       <div class="grid lg:grid-cols-5 gap-16">
         <!-- Contact Info -->
-        <div class="lg:col-span-2 space-y-8">
+        <div class="lg:col-span-2 space-y-8 animate-fade-up">
           <div>
             <h2 class="text-3xl font-medium text-white tracking-tight mb-4">
               Start a Conversation
@@ -612,7 +902,7 @@
         </div>
 
         <!-- Form -->
-        <div class="lg:col-span-3 bg-zinc-900/30 rounded-2xl p-8 border border-white/5">
+        <div class="lg:col-span-3 bg-zinc-900/30 rounded-2xl p-8 border border-white/5 animate-fade-up delay-200">
           <form class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="space-y-2">
@@ -699,10 +989,19 @@
               </label>
             </div>
 
-            <button type="submit"
-              class="w-full bg-white text-black font-medium py-3 rounded hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2">
-              Send Message
-              <iconify-icon icon="solar:plain-linear" width="18"></iconify-icon>
+            <button type="submit" class="star-border-container group w-full">
+              <div class="border-glow-wrapper">
+                <div class="border-gradient-bottom"
+                  style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+                <div class="border-gradient-top"
+                  style="background: radial-gradient(circle, white, transparent 15px); animation-duration: 6s;"></div>
+              </div>
+              <div
+                class="inner-content w-full py-3 flex items-center justify-center gap-2 font-medium text-white group-hover:bg-white/10 transition-colors"
+                style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);">
+                Send Message
+                <iconify-icon icon="solar:plain-linear" width="18"></iconify-icon>
+              </div>
             </button>
 
             <p class="text-xs text-zinc-600 mt-4">
@@ -740,6 +1039,249 @@
     </div>
   </footer>
 
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // --- MOBILE MENU LOGIC ---
+      function closeMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const icon = document.querySelector('#mobile-menu-btn iconify-icon');
+
+        if (menu && icon) {
+          menu.classList.remove('opacity-100', 'translate-y-0');
+          menu.classList.add('opacity-0', 'translate-y-[-20px]');
+          icon.setAttribute('icon', 'solar:hamburger-menu-linear');
+
+          setTimeout(() => {
+            menu.classList.remove('flex');
+            menu.classList.add('hidden');
+          }, 300);
+        }
+      }
+
+      const mobileBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const mobileIcon = mobileBtn ? mobileBtn.querySelector('iconify-icon') : null;
+      const mobileLinks = document.querySelectorAll('.mobile-link');
+
+      if (mobileBtn && mobileMenu && mobileIcon) {
+        mobileBtn.addEventListener('click', () => {
+          if (mobileMenu.classList.contains('hidden')) {
+            mobileMenu.classList.remove('hidden');
+            mobileMenu.classList.add('flex');
+            // Small delay to allow CSS to process display:flex before animating opacity
+            setTimeout(() => {
+              mobileMenu.classList.remove('opacity-0', 'translate-y-[-20px]');
+              mobileMenu.classList.add('opacity-100', 'translate-y-0');
+            }, 10);
+            mobileIcon.setAttribute('icon', 'solar:close-circle-linear');
+          } else {
+            closeMobileMenu();
+          }
+        });
+      }
+
+      mobileLinks.forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+      });
+
+      const observerOptions = {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.1
+      };
+
+      const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      const revealElements = document.querySelectorAll('.animate-fade-up');
+      revealElements.forEach(el => observer.observe(el));
+
+      // --- IMAGE TRAIL LOGIC ---
+      function lerp(a, b, n) {
+        return (1 - n) * a + n * b;
+      }
+
+      function getLocalPointerPos(e, rect) {
+        let clientX = 0, clientY = 0;
+        if (e.touches && e.touches.length > 0) {
+          clientX = e.touches[0].clientX;
+          clientY = e.touches[0].clientY;
+        } else {
+          clientX = e.clientX;
+          clientY = e.clientY;
+        }
+        return {
+          x: clientX - rect.left,
+          y: clientY - rect.top
+        };
+      }
+
+      function getMouseDistance(p1, p2) {
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        return Math.hypot(dx, dy);
+      }
+
+      function getNewPosition(position, offset, arr) {
+        const realOffset = Math.abs(offset) % arr.length;
+        if (position - realOffset >= 0) {
+          return position - realOffset;
+        } else {
+          return arr.length - (realOffset - position);
+        }
+      }
+
+      class ImageItem {
+        constructor(DOM_el) {
+          this.DOM = { el: DOM_el, inner: null };
+          this.defaultStyle = { scale: 1, x: 0, y: 0, opacity: 0 };
+          this.rect = null;
+          this.DOM.inner = this.DOM.el.querySelector('.trail-content__img-inner');
+          this.getRect();
+          this.initEvents();
+        }
+        initEvents() {
+          this.resize = () => {
+            gsap.set(this.DOM.el, this.defaultStyle);
+            this.getRect();
+          };
+          window.addEventListener('resize', this.resize);
+        }
+        getRect() {
+          this.rect = this.DOM.el.getBoundingClientRect();
+        }
+      }
+
+      class ImageTrailVariant7 {
+        constructor(container) {
+          this.container = container;
+          this.DOM = { el: container };
+          this.images = [...container.querySelectorAll('.trail-content__img')].map(img => new ImageItem(img));
+          this.imagesTotal = this.images.length;
+
+          if (this.imagesTotal === 0) return;
+
+          this.imgPosition = 0;
+          this.zIndexVal = 1;
+          this.activeImagesCount = 0;
+          this.isIdle = true;
+          this.threshold = 80;
+
+          this.mousePos = { x: 0, y: 0 };
+          this.lastMousePos = { x: 0, y: 0 };
+          this.cacheMousePos = { x: 0, y: 0 };
+
+          this.visibleImagesCount = 0;
+          this.visibleImagesTotal = 9;
+          this.visibleImagesTotal = Math.min(this.visibleImagesTotal, this.imagesTotal - 1);
+
+          const handlePointerMove = ev => {
+            const rect = container.getBoundingClientRect();
+            this.mousePos = getLocalPointerPos(ev, rect);
+          };
+          container.addEventListener('mousemove', handlePointerMove);
+          container.addEventListener('touchmove', handlePointerMove, { passive: true });
+
+          const initRender = ev => {
+            const rect = container.getBoundingClientRect();
+            this.mousePos = getLocalPointerPos(ev, rect);
+            this.cacheMousePos = { ...this.mousePos };
+            requestAnimationFrame(() => this.render());
+            container.removeEventListener('mousemove', initRender);
+            container.removeEventListener('touchmove', initRender);
+          };
+          container.addEventListener('mousemove', initRender);
+          container.addEventListener('touchmove', initRender, { passive: true });
+        }
+
+        render() {
+          let distance = getMouseDistance(this.mousePos, this.lastMousePos);
+          this.cacheMousePos.x = lerp(this.cacheMousePos.x, this.mousePos.x, 0.3);
+          this.cacheMousePos.y = lerp(this.cacheMousePos.y, this.mousePos.y, 0.3);
+
+          if (distance > this.threshold) {
+            this.showNextImage();
+            this.lastMousePos = { ...this.mousePos };
+          }
+          if (this.isIdle && this.zIndexVal !== 1) this.zIndexVal = 1;
+
+          requestAnimationFrame(() => this.render());
+        }
+
+        showNextImage() {
+          ++this.zIndexVal;
+          this.imgPosition = this.imgPosition < this.imagesTotal - 1 ? this.imgPosition + 1 : 0;
+          const img = this.images[this.imgPosition];
+          ++this.visibleImagesCount;
+
+          gsap.killTweensOf(img.DOM.el);
+          const scaleValue = gsap.utils.random(0.5, 1.6);
+
+          gsap
+            .timeline({
+              onStart: () => this.onImageActivated(),
+              onComplete: () => this.onImageDeactivated()
+            })
+            .fromTo(
+              img.DOM.el,
+              {
+                scale: scaleValue - Math.max(gsap.utils.random(0.2, 0.6), 0),
+                rotationZ: 0,
+                opacity: 1,
+                zIndex: this.zIndexVal,
+                x: this.cacheMousePos.x - img.rect.width / 2,
+                y: this.cacheMousePos.y - img.rect.height / 2
+              },
+              {
+                duration: 0.4,
+                ease: 'power3',
+                scale: scaleValue,
+                rotationZ: gsap.utils.random(-15, 15),
+                x: this.mousePos.x - img.rect.width / 2,
+                y: this.mousePos.y - img.rect.height / 2
+              },
+              0
+            );
+
+          if (this.visibleImagesCount >= this.visibleImagesTotal) {
+            const lastInQueue = getNewPosition(this.imgPosition, this.visibleImagesTotal, this.images);
+            const oldImg = this.images[lastInQueue];
+            gsap.to(oldImg.DOM.el, {
+              duration: 0.4,
+              ease: 'power4',
+              opacity: 0,
+              scale: 1.3,
+              onComplete: () => {
+                if (this.activeImagesCount === 0) {
+                  this.isIdle = true;
+                }
+              }
+            });
+          }
+        }
+
+        onImageActivated() {
+          this.activeImagesCount++;
+          this.isIdle = false;
+        }
+        onImageDeactivated() {
+          this.activeImagesCount--;
+        }
+      }
+
+      // Initialize the Image Trail
+      const trailContainer = document.getElementById('image-trail-container');
+      if (trailContainer && typeof gsap !== 'undefined') {
+        new ImageTrailVariant7(trailContainer);
+      }
+    });
+  </script>
 </body>
 
 </html>
